@@ -43,31 +43,40 @@ export default function LoginEmpresa() {
   const [notifs, setNotif] = useState([]);
   const [token, setToken] = useState("Validating Permission");
   const [copied, setCopied] = useState(false);
-  async function requestPermission() {
+async function requestPermission() {
   const permission = await Notification.requestPermission();
-    const VITE_APP_VAPID_KEY ="BAGyDSe4JGiUDkGYHBDO-c9IML0xqtn8K6WHq9kuL2I6Wz-ujRMxdZon-j3uPU0XINkiCeDnRGqYnPgcvW-RHwQ";
-  if (permission === "granted") {
-    console.log("vapid id: ", VITE_APP_VAPID_KEY);
 
-    try {
-      const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+  if (permission !== "granted") {
+    setToken("Permissão negada");
+    alert("Você negou a permissão de notificações.");
+    return;
+  }
 
-      const _token = await getToken(messaging, {
-        vapidKey: VITE_APP_VAPID_KEY,
-        serviceWorkerRegistration: registration,
-      });
+  try {
+    // Aguarde o service worker registrar
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
 
-      setToken(_token || "Token não retornado");
-      console.log("Token gerado:", _token);
-    } catch (e) {
-      console.error("Erro ao gerar token:", e);
-      setToken("Erro ao gerar token");
+    // Aguarde ele estar pronto
+    await navigator.serviceWorker.ready;
+
+    const _token = await getToken(messaging, {
+      vapidKey: 'BAGyDSe4JGiUDkGYHBDO-c9IML0xqtn8K6WHq9kuL2I6Wz-ujRMxdZon-j3uPU0XINkiCeDnRGqYnPgcvW-RHwQ',
+      serviceWorkerRegistration: registration,
+    });
+
+    if (_token) {
+      setToken(_token);
+      console.log("✅ Token gerado:", _token);
+    } else {
+      setToken("Token não retornado");
+      console.warn("⚠️ Token vazio");
     }
-  } else if (permission === "denied") {
-    setToken("Acesso bloqueado");
-    alert("Você negou as notificações.");
+  } catch (err) {
+    console.error("Erro ao gerar token:", err);
+    setToken("Erro ao gerar token");
   }
 }
+
 useEffect(() => {
   requestPermission();
   const messaging = messagingPromise;
