@@ -33,7 +33,7 @@ export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginEmpresa />} />
+        <Route path="/" element={<EntregadorPedidos />} />
         <Route path="/empresa/cadastro" element={<CadastroEmpresa />} />
         <Route path="/entregador/cadastro" element={<CadastroEntregador />} />
         <Route path="/empresa/:empresaId/produtos" element={<PainelProdutos />} />

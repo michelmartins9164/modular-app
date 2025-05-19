@@ -30,7 +30,8 @@ interface Pedido {
 }
 
 export default function EntregadorPedidos() {
-  const { entregadorId } = useParams()
+ // const { entregadorId } = useParams()
+  const entregadorId  = '4l3DDoZ05UYhT5Cp9Bfm'
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [entregadorNome, setEntregadorNome] = useState('')
   const [loading, setLoading] = useState(true)
