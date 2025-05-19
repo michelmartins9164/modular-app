@@ -11,6 +11,7 @@ firebase.initializeApp({
   measurementId: "G-K7WH7EWHQY"
 });
 
+const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
@@ -19,5 +20,3 @@ messaging.onBackgroundMessage(function(payload) {
     icon: '/firebase-logo.png',
   });
 });
-
-const messaging = firebase.messaging();
