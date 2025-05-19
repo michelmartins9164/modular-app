@@ -7,7 +7,8 @@ import {
 } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore'
-import { db } from '../../firebase'
+import { db, messaging } from '../../firebase'
+import { onMessage } from 'firebase/messaging'
 
 interface Pedido {
   id: string
@@ -24,7 +25,20 @@ export default function PainelEntregador() {
 
 const carregarPedidos = async () => {
   setLoading(true)
+useEffect(() => {
+  carregarPedidos()
 
+  // Ouvir notificações enquanto o app está aberto
+  const unsubscribe = onMessage(messaging, (payload) => {
+    console.log('📥 Notificação recebida no navegador:', payload)
+    alert(`🔔 ${payload.notification?.title}: ${payload.notification?.body}`)
+  })
+
+  return () => {
+    // cleanup
+    unsubscribe()
+  }
+}, [])
   const snap = await getDocs(collection(db, 'pedidos_prontos'))
   const lista: Pedido[] = []
 
