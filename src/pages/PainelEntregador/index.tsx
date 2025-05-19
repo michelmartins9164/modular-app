@@ -15,6 +15,7 @@ interface Pedido {
   preco: number
   empresaId: string
   nomeEmpresa?: string
+  to?: string
 }
 
 export default function PainelEntregador() {

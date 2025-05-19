@@ -1,95 +1,72 @@
-import { useEffect, useState } from "react";
-import { messaging, messagingPromise } from "../../firebase";
-import { getToken, onMessage } from "firebase/messaging";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  useToast,
+} from '@chakra-ui/react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { db } from '../../firebase'
+import { collection, getDocs, query, where } from 'firebase/firestore'
 
 export default function LoginEmpresa() {
- /*  useEffect(() => {
-    Notification.requestPermission().then(async (permission) => {
-      if (permission === "granted") {
-        const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-        
-        const messaging = await messagingPromise;
-        if (!messaging) {
-          console.warn("🚫 Messaging não suportado neste navegador");
-          return;
-        }
+  const [nomeEmpresa, setNomeEmpresa] = useState('')
+  const toast = useToast()
+  const navigate = useNavigate()
 
-        getToken(messaging, {
-          vapidKey: "BAGyDSe4JGiUDkGYHBDO-c9IML0xqtn8K6WHq9kuL2I6Wz-ujRMxdZon-j3uPU0XINkiCeDnRGqYnPgcvW-RHwQ",
-          serviceWorkerRegistration: registration,
-        })
-        .then((token) => {
-          if (token) {
-            console.log("✅ Token gerado:", token);
-          } else {
-            console.warn("⚠️ Nenhum token retornado");
-          }
-        })
-        .catch((err) => {
-          console.error("❌ Erro ao gerar token:", err);
-        });
+  const handleLogin = async () => {
+    if (!nomeEmpresa.trim()) return
 
-        // Listener para notificações em primeiro plano
-        onMessage(messaging, (payload) => {
-          console.log("📥 Mensagem recebida em primeiro plano:", payload);
-          alert(`Notificação: ${payload.notification?.title}`);
-        });
+    try {
+      const q = query(
+        collection(db, 'empresas'),
+        where('nome', '==', nomeEmpresa.trim())
+      )
+      const snapshot = await getDocs(q)
+
+      if (!snapshot.empty) {
+        const empresaDoc = snapshot.docs[0]
+        const empresaId = empresaDoc.id
+
+        toast({
+          title: 'Login realizado',
+          status: 'success',
+          duration: 2000,
+        })
+
+        navigate(`/empresa/${empresaId}/produtos`)
       } else {
-        console.warn("🚫 Permissão negada");
+        toast({
+          title: 'Empresa não encontrada',
+          status: 'error',
+          duration: 3000,
+        })
       }
-    });
-  }, []); */
-
-  const [notifs, setNotif] = useState([]);
-  const [token, setToken] = useState("Validating Permission");
-  const [copied, setCopied] = useState(false);
-async function requestPermission() {
-  const permission = await Notification.requestPermission();
-
-  if (permission !== "granted") {
-    setToken("Permissão negada");
-    alert("Você negou a permissão de notificações.");
-    return;
-  }
-
-  try {
-    // Aguarde o service worker registrar
-    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-
-    // Aguarde ele estar pronto
-    await navigator.serviceWorker.ready;
-
-    const _token = await getToken(messaging, {
-      vapidKey: 'BAGyDSe4JGiUDkGYHBDO-c9IML0xqtn8K6WHq9kuL2I6Wz-ujRMxdZon-j3uPU0XINkiCeDnRGqYnPgcvW-RHwQ',
-      serviceWorkerRegistration: registration,
-    });
-
-    if (_token) {
-      setToken(_token);
-      console.log("✅ Token gerado:", _token);
-    } else {
-      setToken("Token não retornado");
-      console.warn("⚠️ Token vazio");
+    } catch (err) {
+      console.error('Erro no login:', err)
+      toast({
+        title: 'Erro ao buscar empresa',
+        status: 'error',
+        duration: 3000,
+      })
     }
-  } catch (err) {
-    console.error("Erro ao gerar token:", err);
-    setToken("Erro ao gerar token");
   }
-}
-
-useEffect(() => {
-  requestPermission();
-  const messaging = messagingPromise;
-  if (!messaging) {
-    console.warn("🚫 Messaging não suportado neste navegador");
-    return;
-  }
-
-}, []);
 
   return (
-    <div>
-      <h1 style={{color:'#000'}}>FCM Web Example</h1>
-    </div>
-  );
+    <Box maxW="md" mx="auto" mt="10">
+      <FormControl>
+        <FormLabel>Nome da empresa</FormLabel>
+        <Input
+          placeholder="Digite o nome"
+          value={nomeEmpresa}
+          onChange={(e) => setNomeEmpresa(e.target.value)}
+        />
+      </FormControl>
+      <Button mt={4} colorScheme="blue" onClick={handleLogin}>
+        Entrar
+      </Button>
+    </Box>
+  )
 }

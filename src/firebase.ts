@@ -2,7 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { getMessaging, isSupported } from 'firebase/messaging';
+import { getMessaging, getToken, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB3vZaQ41mSwiC8oG15WEj3T6KsGobZO9Q",
@@ -18,8 +18,15 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const messaging = getMessaging(app); // Não use direto ainda
 
-export const messagingPromise = isSupported().then((supported) =>
-  supported ? getMessaging(app) : null
-);
+const messaging = getMessaging(app);
+
+export const getFCMToken = async (registration?: ServiceWorkerRegistration) => {
+  const supported = await isSupported();
+  if (!supported) return null;
+
+  return getToken(messaging, {
+    vapidKey: 'BAGyDSe4JGiUDkGYHBDO-c9IML0xqtn8K6WHq9kuL2I6Wz-ujRMxdZon-j3uPU0XINkiCeDnRGqYnPgcvW-RHwQ',
+    serviceWorkerRegistration: registration,
+  });
+};

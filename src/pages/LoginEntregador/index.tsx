@@ -9,8 +9,8 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '../../firebase'
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
+import { db, getFCMToken } from '../../firebase'
 
 export default function LoginEntregador() {
   const [nome, setNome] = useState('')
@@ -31,7 +31,21 @@ export default function LoginEntregador() {
 
       toast({ title: 'Login realizado com sucesso', status: 'success' })
 
-      // Redireciona para painel ou lista de entregas
+            // 1. Registra o SW se ainda não tiver
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+
+      // 2. Gera token FCM
+      const token = await getFCMToken(registration)
+
+      if (token) {
+        // 3. Salva no Firestore
+        await updateDoc(doc(db, 'entregadores', entregadorId), {
+          fcmToken: token,
+        })
+        
+        console.log('🔐 Token salvo:', token)
+      }
+        // Redireciona para painel ou lista de entregas
       navigate(`/entregador/${entregadorId}/pedidos`)
     } else {
       toast({ title: 'Entregador não encontrado', status: 'error' })

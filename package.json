@@ -33,6 +33,7 @@
     "prettier": "^3.2.5",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",
+    "vite-plugin-mkcert": "^1.17.8",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }
