@@ -31,7 +31,7 @@ export function AppRoutes() {
 }, []);
 
   return (
-    <BrowserRouter>
+<BrowserRouter basename="/modular-app/">
       <Routes>
         <Route path="/" element={<EntregadorPedidos />} />
         <Route path="/empresa/cadastro" element={<CadastroEmpresa />} />
