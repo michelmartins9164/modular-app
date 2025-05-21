@@ -30,8 +30,7 @@ interface Pedido {
 }
 
 export default function EntregadorPedidos() {
-  // const { entregadorId } = useParams()
-  const entregadorId = '4l3DDoZ05UYhT5Cp9Bfm'
+  const { entregadorId } = useParams()
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [entregadorNome, setEntregadorNome] = useState('')
   const [loading, setLoading] = useState(true)
@@ -87,7 +86,7 @@ export default function EntregadorPedidos() {
       })
 
       
-        const response = await fetch('http://localhost:3000/send-notification', {
+        const response = await fetch('https://firebase-admin-wcjs.onrender.com/send-notification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
