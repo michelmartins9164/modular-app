@@ -87,7 +87,7 @@ export default function EntregadorPedidos() {
       })
 
       
-        const response = await fetch('http://localhost:3000/send-notificationhttp://localhost:3000/send-notification', {
+        const response = await fetch('http://localhost:3000/send-notification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
