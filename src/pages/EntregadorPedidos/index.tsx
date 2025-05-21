@@ -30,8 +30,8 @@ interface Pedido {
 }
 
 export default function EntregadorPedidos() {
- // const { entregadorId } = useParams()
-  const entregadorId  = '4l3DDoZ05UYhT5Cp9Bfm'
+  // const { entregadorId } = useParams()
+  const entregadorId = '4l3DDoZ05UYhT5Cp9Bfm'
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [entregadorNome, setEntregadorNome] = useState('')
   const [loading, setLoading] = useState(true)
@@ -50,25 +50,25 @@ export default function EntregadorPedidos() {
       const snap = await getDocs(collection(db, 'pedidos_prontos'))
       const pedidosComEmpresa: Pedido[] = []
 
-for (const docSnap of snap.docs) {
-  const data = docSnap.data()
+      for (const docSnap of snap.docs) {
+        const data = docSnap.data()
 
-  // 🔒 Filtra: mostra só se for pendente ou aceito por mim
-  if (data.status === 'aceito' && data.entregadorId !== entregadorId) continue
+        // 🔒 Filtra: mostra só se for pendente ou aceito por mim
+        if (data.status === 'aceito' && data.entregadorId !== entregadorId) continue
 
-  const empresaSnap = await getDoc(doc(db, 'empresas', data.empresaId))
+        const empresaSnap = await getDoc(doc(db, 'empresas', data.empresaId))
 
-  pedidosComEmpresa.push({
-    id: docSnap.id,
-    nome: data.nome,
-    preco: data.preco,
-    empresaId: data.empresaId,
-    nomeEmpresa: empresaSnap.exists() ? empresaSnap.data().nome : 'Desconhecida',
-    status: data.status,
-    entregadorId: data.entregadorId,
-    entregadorNome: data.entregadorNome,
-  })
-}
+        pedidosComEmpresa.push({
+          id: docSnap.id,
+          nome: data.nome,
+          preco: data.preco,
+          empresaId: data.empresaId,
+          nomeEmpresa: empresaSnap.exists() ? empresaSnap.data().nome : 'Desconhecida',
+          status: data.status,
+          entregadorId: data.entregadorId,
+          entregadorNome: data.entregadorNome,
+        })
+      }
 
 
       setPedidos(pedidosComEmpresa)
@@ -85,6 +85,28 @@ for (const docSnap of snap.docs) {
         entregadorId,
         entregadorNome,
       })
+
+      
+        const response = await fetch('http://localhost:3000/send-notificationhttp://localhost:3000/send-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: 'eSkEmC1xNNu1sZgUK8j-qq:APA91bGtcMMb_ovx50Cd5Ls34fG3XCyf5eC5Q8qJCdGPeM5c4g6LPclpJyaZicUpZoodgF9IvUFYvA2MtHHI6GsXHpq33yY9J1ViK3vMO3GE5VohW2mMO34', // Substitua pelo token FCM do destinatário
+            title: 'Novo pedido disponível',
+            body: `Produto: AAAAAAAAAAA - R$ 30`,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Erro ao enviar notificação:', errorText);
+        } else {
+          const data = await response.text();
+          console.log('Notificação enviada com sucesso:', data);
+        }
+     
 
       toast({
         title: 'Pedido aceito com sucesso!',
@@ -107,30 +129,30 @@ for (const docSnap of snap.docs) {
       })
     }
   }
-useEffect(() => {
-  if (Notification.permission === 'default') {
-    Notification.requestPermission().then((permission) => {
-      console.log('Permissão de notificação:', permission)
-    })
-  }
-}, [])
-
-useEffect(() => {
-  const handleNovoPedido = (e: any) => {
-    if (Notification.permission === 'granted') {
-      new Notification('📦 Novo pedido disponível!', {
-        body: `${e.detail.nome} - R$ ${e.detail.preco.toFixed(2)}`,
-        icon: '/logo192.png',
+  useEffect(() => {
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().then((permission) => {
+        console.log('Permissão de notificação:', permission)
       })
     }
-  }
+  }, [])
 
-  window.addEventListener('novo-pedido', handleNovoPedido)
+  useEffect(() => {
+    const handleNovoPedido = (e: any) => {
+      if (Notification.permission === 'granted') {
+        new Notification('📦 Novo pedido disponível!', {
+          body: `${e.detail.nome} - R$ ${e.detail.preco.toFixed(2)}`,
+          icon: '/logo192.png',
+        })
+      }
+    }
 
-  return () => {
-    window.removeEventListener('novo-pedido', handleNovoPedido)
-  }
-}, [])
+    window.addEventListener('novo-pedido', handleNovoPedido)
+
+    return () => {
+      window.removeEventListener('novo-pedido', handleNovoPedido)
+    }
+  }, [])
 
 
 
